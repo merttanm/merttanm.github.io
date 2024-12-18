@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Araçlar Listesi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Rent A Car - Araçlar Listesi</h1>
+    </header>
+    <nav>
+        <ul class="menu">
+            <li><a href="index.html">Ana Sayfa</a></li>
+            <li><a href="list-cars.html">Araçlar Listesi</a></li>
+            <li><a href="update-car.html">Envanter Güncelle</a></li>
+            <li><a href="filter-cars.html">Envanter Filtreleme</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h2>Mevcut Araçlar</h2>
+        <div id="carList"></div>
+    </main>
+    <script>
+        const carList = document.getElementById('carList');
+        let db;
+
+        // IndexedDB'yi başlatma
+        const request = indexedDB.open("CarInventoryDB", 1);
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("IndexedDB bağlantısı başarıyla sağlandı.");
+            fetchCars(); // Araçları veritabanından al ve listele
+        };
+
+        request.onerror = (event) => {
+            console.error("IndexedDB başlatılırken bir hata oluştu:", event.target.error);
+        };
+
+        // Araçları IndexedDB'den al ve listele
+        function fetchCars() {
+            const transaction = db.transaction(["cars"], "readonly");
+            const store = transaction.objectStore("cars");
+            const cars = store.getAll();
+
+            cars.onsuccess = () => {
+                if (cars.result.length === 0) {
+                    carList.innerHTML = '<p>Henüz araç eklenmedi.</p>';
+                } else {
+                    cars.result.forEach(car => {
+                        const carItem = document.createElement('div');
+                        carItem.classList.add('car-item');
+                        carItem.innerHTML = `
+                            <h3>${car.model} (${car.year})</h3>
+                            <img src="${car.image}" alt="${car.model}" style="width: 200px; height: 200px; object-fit: cover;">
+                            <p>Km: ${car.km}</p>
+                            <p>Renk: ${car.color}</p>
+                            <p>Yakıt: ${car.fuel}</p>
+                            <p>Şanzıman: ${car.transmission}</p>
+                        `;
+                        carList.appendChild(carItem);
+                    });
+                }
+            };
+
+            cars.onerror = (event) => {
+                console.error("Araçlar alınırken bir hata oluştu:", event.target.error);
+            };
+        }
+    </script>
+</body>
+
+</html>

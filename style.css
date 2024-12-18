@@ -1,0 +1,117 @@
+/* Genel Sayfa Stili */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fc;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Menü için stil */
+  .menu {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    background: linear-gradient(45deg, #0078d4, #00c6ff);
+    padding: 12px 0;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .menu li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+  }
+  
+  .menu li a:hover {
+    color: #0078d4;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.1);
+  }
+  
+  /* Header Stil */
+  header {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  header h1 {
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+  
+  /* Ana içerik stili */
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  /* Form Alanları */
+  form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  
+  form input, form select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+  
+  form input:focus, form select:focus {
+    border-color: #0078d4;
+    outline: none;
+  }
+  
+  /* Buton Stili */
+  button {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #005bb5;
+  }
+  
+  /* Başarı Mesajı */
+  #successMessage {
+    display: none;
+    color: green;
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
