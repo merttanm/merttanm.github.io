@@ -1,34 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Envanter Filtreleme</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <header>
-    <h1>Rent A Car - Envanter Filtreleme</h1>
-  </header>
+
   <nav>
     <ul class="menu">
       <li><a href="index.html">Ana Sayfa</a></li>
-      <li><a href="add-car.html">Envanter Ekle</a></li>
-      <li><a href="list-cars.html">Araçlar Listesi</a></li>
-      <li><a href="update-car.html">Envanter Güncelle</a></li>
+      <li><a href="add-car.html">Envantere Araç Ekle</a></li>
+      <li><a href="update-car.html">Envanteri Güncelle</a></li>
+      <li><a href="filter-cars.html">Envanteri Filtrele</a></li>
     </ul>
   </nav>
+
   <main>
     <h2>Filtreleme Kriterleri</h2>
-    <form>
+    <form id="filterForm">
       <label for="fuel">Yakıt Türü:</label>
       <select id="fuel" name="fuel">
-        <option value="benzinli">Benzinli</option>
-        <option value="dizel">Dizel</option>
-        <option value="hibrit">Hibrit</option>
+        <option value="Benzin">Benzin</option>
+        <option value="Dizel">Dizel</option>
+        <option value="Hibrit">Hibrit</option>
       </select>
       <button type="submit">Filtrele</button>
     </form>
+
+    <h2>Araçlar</h2>
+    <div id="carList"></div>
   </main>
+
+  <script>
+    const carList = document.getElementById('carList');
+    const fuelSelect = document.getElementById('fuel');
+    const form = document.getElementById('filterForm');
+    let db;
+
+    // IndexedDB'yi başlatma
+    const request = indexedDB.open("CarInventoryDB", 8);
+
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      console.log("IndexedDB bağlantısı başarıyla sağlandı.");
+      fetchCars(); // Araçları veritabanından al ve listele
+    };
+
+    request.onerror = (event) => {
+      console.error("IndexedDB başlatılırken bir hata oluştu:", event.target.error);
+    };
+
+    // Araçları IndexedDB'den al ve listele
+    function fetchCars() {
+      const transaction = db.transaction(["cars"], "readonly");
+      const store = transaction.objectStore("cars");
+      const cars = store.getAll();
+
+      cars.onsuccess = () => {
+        if (cars.result.length === 0) {
+          carList.innerHTML = '<p>Henüz araç eklenmedi.</p>';
+        } else {
+          // İlk başta tüm araçları listele
+          displayCars(cars.result);
+        }
+      };
+
+      cars.onerror = (event) => {
+        console.error("Araçlar alınırken bir hata oluştu:", event.target.error);
+      };
+    }
+
+    // Araçları listele
+    function displayCars(filteredCars) {
+      carList.innerHTML = '';
+      if (filteredCars.length === 0) {
+        carList.innerHTML = '<p>Seçilen yakıt türünde araç bulunmamaktadır.</p>';
+      } else {
+        filteredCars.forEach(car => {
+          const carItem = document.createElement('div');
+          carItem.classList.add('car-item');
+
+
+          const carImage = Array.isArray(car.images) && car.images.length > 0 ? car.images[0] : 'default-image.jpg'; // Varsayılan resim
+
+          const carImageDiv = document.createElement('div');
+          carImageDiv.classList.add('car-image');
+          const img = document.createElement('img');
+          img.src = carImage;
+          img.alt = `${car.model}`;
+          carImageDiv.appendChild(img);
+
+          const carInfoDiv = document.createElement('div');
+          carInfoDiv.classList.add('car-info');
+
+          const carTitle = document.createElement('h3');
+          carTitle.textContent = `${car.model} (${car.year})`;
+          carInfoDiv.appendChild(carTitle);
+
+          const carDetails = [
+            { label: 'Kilometre', value: car.km },
+            { label: 'Renk', value: car.color },
+            { label: 'Plaka', value: car.plate },
+            { label: 'Yakıt Türü', value: car.fuel },
+            { label: 'Şanzıman', value: car.transmission },
+            { label: 'Kasa Tipi', value: car.vehicleType },
+            { label: 'Çekiş', value: car.category }
+          ];
+
+          carDetails.forEach(detail => {
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${detail.label}:</strong> ${detail.value}`;
+            carInfoDiv.appendChild(p);
+          });
+
+          carItem.appendChild(carImageDiv);
+          carItem.appendChild(carInfoDiv);
+          carList.appendChild(carItem);
+        });
+      }
+    }
+
+    // Filtreleme işlemi
+    // Filtreleme işlemi
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const fuelType = fuelSelect.value.toLowerCase();  // Yakıt türünü küçük harfe çeviriyoruz.
+      console.log("Seçilen Yakıt Türü:", fuelType);  
+
+      
+      // IndexedDB'den verileri alıp filtrele
+      const transaction = db.transaction(["cars"], "readonly");
+      const store = transaction.objectStore("cars");
+      const cars = store.getAll();
+
+      cars.onsuccess = () => {
+        const filteredCars = cars.result.filter(car => {
+          if (!car.fuel) {
+            console.warn("Bir araçta yakıt türü bulunamadı:", car);
+            return false;
+          }
+          console.log("Filtrelenen Araç Yakıt Türü:", car.fuel); // Yakıt türünü kontrol et
+          // Yakıt türünü doğru karşılaştırdığımıza emin oluyoruz
+          return car.fuel.trim().toLowerCase() === fuelType.trim().toLowerCase();
+        });
+
+        // Filtrelenmiş araçları görüntüle
+        displayCars(filteredCars);
+      };
+
+      cars.onerror = (event) => {
+        console.error("Araçlar alınırken bir hata oluştu:", event.target.error);
+      };
+    });
+
+
+
+  </script>
+
 </body>
+
 </html>

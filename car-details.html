@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Araç Detayı</title>
+    <link rel="stylesheet" href="detailsstyle.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav>
+        <ul class="menu">
+            <li><a href="index.html">Ana Sayfa</a></li>
+            <li><a href="add-car.html">Envantere Araç Ekle</a></li>
+            <li><a href="update-car.html">Envanteri Güncelle</a></li>
+            <li><a href="filter-cars.html">Envanteri Filtrele</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h2>Araç Detayları</h2>
+        <div id="carDetail"></div>
+
+        <!-- Reservation Section -->
+        <section id="carReservation">
+            <div class="car-status">
+                <div class="car-status">
+                    <h3>Rezervasyon Durumu</h3>
+                    <p id="reservationStatus">
+                        Bu araba
+                        <span id="reservationStatusText" class="status" onclick="goToReservationPage()"></span>.
+                    </p>
+                </div>
+
+                <form id="reservationForm">
+                    <h3>Rezervasyon Yap</h3>
+                    <div class="form-group">
+                        <label for="customerName">Ad Soyad</label>
+                        <input type="text" id="customerName" placeholder="Adınızı girin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservationDate">Rezervasyon Tarihi</label>
+                        <input type="date" id="reservationDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupLocation">Alış Lokasyonu</label>
+                        <input type="text" id="pickupLocation" placeholder="Alış yerini girin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoffLocation">Teslim Lokasyonu</label>
+                        <input type="text" id="dropoffLocation" placeholder="Teslim yerini girin" required>
+                    </div>
+                    <button type="submit" class="reserve-button">Rezervasyon Yap</button>
+                    <p id="reservationMessage"></p>
+                </form>
+        </section>
+    </main>
+
+    <script>
+        const carDetail = document.getElementById('carDetail');
+        const params = new URLSearchParams(window.location.search);
+        const carId = parseInt(params.get("id"));
+        let db;
+
+        // Initialize IndexedDB
+        const request = indexedDB.open("CarInventoryDB", 9);  // Veritabanı sürümünü 8 olarak ayarlayın
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+
+            // cars object store'ının varlığını kontrol et
+            if (!db.objectStoreNames.contains("cars")) {
+                console.log("cars object store'ı oluşturuluyor.");
+                db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
+            }
+
+            // reservations object store'ının varlığını kontrol et
+            if (!db.objectStoreNames.contains("reservations")) {
+                console.log("reservations object store'ı oluşturuluyor.");
+                const reservationsStore = db.createObjectStore("reservations", { keyPath: "id", autoIncrement: true });
+                reservationsStore.createIndex("carId", "carId", { unique: false });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("IndexedDB bağlantısı sağlandı.");
+            fetchCarDetails();  // Araç detaylarını getirmek için çağır
+        };
+
+        request.onerror = (event) => {
+            console.error("IndexedDB başlatılamadı:", event.target.error);
+        };
+
+        // Fetch car details from IndexedDB
+        function fetchCarDetails() {
+            const transaction = db.transaction(["cars"], "readonly");
+            const store = transaction.objectStore("cars");
+            const request = store.get(carId);
+
+            request.onsuccess = () => {
+                const car = request.result;
+                if (car) {
+                    displayCarDetails(car);
+                    checkReservationStatus(car);
+                } else {
+                    carDetail.innerHTML = '<p>Bu araç bulunamadı.</p>';
+                }
+            };
+
+            request.onerror = (event) => {
+                console.error("Araç detayları alınırken bir hata oluştu:", event.target.error);
+            };
+        }
+
+        // Display car details
+        function displayCarDetails(car) {
+            const carItem = document.createElement('div');
+            carItem.classList.add('car-item');
+
+            // Car image gallery
+            const carImageDiv = document.createElement('div');
+            carImageDiv.classList.add('car-images');
+
+            const carImageContainer = document.createElement('div');
+            carImageContainer.classList.add('image-container');
+            car.images.forEach((image, index) => {
+                const img = document.createElement('img');
+                img.src = image;
+                img.alt = `${car.model} - Fotoğraf ${index + 1}`;
+                img.classList.add('car-image');
+                if (index === 0) img.classList.add('active');
+                carImageContainer.appendChild(img);
+            });
+
+            // Navigation buttons
+            const prevBtn = document.createElement('button');
+            prevBtn.classList.add('nav-button', 'prev');
+            prevBtn.innerHTML = '&lt;';
+            prevBtn.onclick = () => changeImage(-1);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.classList.add('nav-button', 'next');
+            nextBtn.innerHTML = '&gt;';
+            nextBtn.onclick = () => changeImage(1);
+
+            carImageDiv.appendChild(prevBtn);
+            carImageDiv.appendChild(carImageContainer);
+            carImageDiv.appendChild(nextBtn);
+
+            // Car information
+            const carInfoDiv = document.createElement('div');
+            carInfoDiv.classList.add('car-info');
+
+            const carTitle = document.createElement('h3');
+            carTitle.textContent = `${car.model} (${car.year})`;
+            carInfoDiv.appendChild(carTitle);
+
+            const carDetails = [
+                { label: 'Kilometre', value: car.km },
+                { label: 'Renk', value: car.color },
+                { label: 'Plaka', value: car.plate },
+                { label: 'Yakıt Türü', value: car.fuel },
+                { label: 'Şanzıman', value: car.transmission },
+                { label: 'Kasa Tipi', value: car.vehicleType },
+                { label: 'Çekiş', value: car.category },
+            ];
+
+            carDetails.forEach(detail => {
+                const p = document.createElement('p');
+                p.innerHTML = `<strong>${detail.label}:</strong> ${detail.value}`;
+                carInfoDiv.appendChild(p);
+            });
+
+            carItem.appendChild(carImageDiv);
+            carItem.appendChild(carInfoDiv);
+            carDetail.appendChild(carItem);
+        }
+
+        // Image change function
+        function changeImage(direction) {
+            const images = document.querySelectorAll('.car-image');
+            let activeIndex = [...images].findIndex(img => img.classList.contains('active'));
+            activeIndex += direction;
+
+            if (activeIndex >= images.length) activeIndex = 0;
+            if (activeIndex < 0) activeIndex = images.length - 1;
+
+            images.forEach(img => img.classList.remove('active'));
+            images[activeIndex].classList.add('active');
+        }
+
+        // Check reservation status
+        function checkReservationStatus(car) {
+            const reservationForm = document.getElementById('reservationForm');
+            const reservationStatus = document.getElementById('reservationStatus');
+            const transaction = db.transaction(["reservations"], "readonly");
+            const store = transaction.objectStore("reservations");
+            const request = store.index("carId").getAll(carId);
+
+            request.onsuccess = () => {
+                if (request.result.length > 0) {
+                    updateReservationStatus('Rezervasyon yapılmış', true);
+                    reservationForm.style.display = 'none';
+                } else {
+                    updateReservationStatus('Rezervasyon yapılmamış');
+                    reservationForm.style.display = 'block';
+                }
+            };
+
+            request.onerror = (event) => {
+                console.error("Rezervasyon durumu kontrol edilirken hata oluştu:", event.target.error);
+                reservationForm.style.display = 'block';
+            };
+        }
+        function updateReservationStatus(status, clickable = false) {
+            reservationStatus.innerHTML = '';
+            const statusText = document.createElement('span');
+            statusText.textContent = status;
+            statusText.className = 'status ' + (clickable ? 'booked' : 'available');
+
+            if (clickable) {
+                statusText.addEventListener('click', goToReservationPage);
+            }
+
+            reservationStatus.appendChild(document.createTextNode('Bu araba '));
+            reservationStatus.appendChild(statusText);
+            reservationStatus.appendChild(document.createTextNode('.'));
+
+            // Durumu Local Storage içine kaydet
+            localStorage.setItem('reservationStatus', status);
+        }
+
+
+        // Handle reservation form submission
+        const reservationForm = document.getElementById('reservationForm');
+        reservationForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const customerName = document.getElementById('customerName').value;
+            const reservationDate = document.getElementById('reservationDate').value;
+            const pickupLocation = document.getElementById('pickupLocation').value;
+            const dropoffLocation = document.getElementById('dropoffLocation').value;
+
+            if (!customerName || !reservationDate || !pickupLocation || !dropoffLocation) {
+                const reservationMessage = document.getElementById('reservationMessage');
+                reservationMessage.textContent = 'Tüm alanları doldurduğunuzdan emin olun.';
+                reservationMessage.style.color = 'red';
+                return;
+            }
+
+            const transaction = db.transaction(["reservations"], "readwrite");
+            const store = transaction.objectStore("reservations");
+
+            // Yeni rezervasyon verisi
+            const reservation = {
+                carId,
+                customerName,
+                reservationDate,
+                pickupLocation,
+                dropoffLocation
+            };
+
+            store.add(reservation).onsuccess = () => {
+                // Rezervasyon başarıyla kaydedildikten sonra
+                const reservationMessage = document.getElementById('reservationMessage');
+                reservationMessage.textContent = 'Rezervasyon başarıyla oluşturuldu!';
+                reservationMessage.style.color = 'green'; // Başarı durumu
+
+                // Durum bilgisini güncelle
+                const reservationStatus = document.getElementById('reservationStatus');
+                reservationStatus.innerHTML = '<span class="status booked">Rezervasyon yapılmış</span>';
+            };
+
+            // Transaction hata durumunu kontrol et
+            transaction.onerror = function (event) {
+                console.error("Transaction hatası: ", event.target.error);
+                const reservationMessage = document.getElementById('reservationMessage');
+                reservationMessage.textContent = 'Rezervasyon yapılırken bir hata oluştu!';
+                reservationMessage.style.color = 'red'; // Hata durumu
+            };
+        });
+
+        // Go to reservation page
+        function goToReservationPage() {
+            const carId = getCarIdFromCurrentPage();
+            console.log(`Fonksiyon çağrıldı. carId: ${carId}`); // Debug: carId'yi yazdır
+
+            if (carId) {
+                console.log(`Yönlendiriliyor: Reservation-Information.html?carId=${carId}`);
+                window.location.href = `Reservation-Information.html?carId=${carId}`;
+            } else {
+                console.error('Car ID bulunamadı');
+            }
+        }
+
+
+        // Get carId from URL
+        function getCarIdFromCurrentPage() {
+            const params = new URLSearchParams(window.location.search);
+            const carId = params.get("id");
+            console.log(`URL'den alınan carId: ${carId}`); // Debug
+            return carId; // carId'yi döndür
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervasyon Bilgileri</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .reservation-info {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .reservation-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rezervasyon Bilgileri</h1>
+    <div class="reservation-info">
+        <p><strong>Müşteri Adı:</strong> <span id="customerName"></span></p>
+        <p><strong>Rezervasyon Tarihi:</strong> <span id="reservationDate"></span></p>
+        <p><strong>Pick-up Lokasyonu:</strong> <span id="pickupLocation"></span></p>
+        <p><strong>Drop-off Lokasyonu:</strong> <span id="dropoffLocation"></span></p>
+    </div>
+
+    <script>
+        let db;
+
+        // Veritabanı bağlantısını kur
+        const request = indexedDB.open("CarInventoryDB", 8);  // Veritabanı sürümünü 8 olarak ayarlayın
+
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+
+            if (!db.objectStoreNames.contains("reservations")) {
+                const reservationsStore = db.createObjectStore("reservations", { keyPath: "id", autoIncrement: true });
+                reservationsStore.createIndex("carId", "carId", { unique: false });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("IndexedDB bağlantısı sağlandı.");
+            fetchReservationData();  // Rezervasyon bilgilerini getir
+        };
+
+        request.onerror = (event) => {
+            console.error("IndexedDB başlatılamadı:", event.target.error);
+        };
+
+        // URL'den rezervasyon bilgilerini al
+        function fetchReservationData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const carId = urlParams.get('carId');
+
+            if (carId) {
+                const transaction = db.transaction(["reservations"], "readonly");
+                const store = transaction.objectStore("reservations");
+                const request = store.index("carId").getAll(Number(carId)); // carId'yi sayıya dönüştür
+
+                request.onsuccess = function(event) {
+                    const reservation = event.target.result[0];
+                    if (reservation) {
+                        document.getElementById("customerName").textContent = reservation.customerName;
+                        document.getElementById("reservationDate").textContent = reservation.reservationDate;
+                        document.getElementById("pickupLocation").textContent = reservation.pickupLocation;
+                        document.getElementById("dropoffLocation").textContent = reservation.dropoffLocation;
+                    } else {
+                        alert("Rezervasyon bulunamadı.");
+                    }
+                };
+
+                request.onerror = function(event) {
+                    console.error("Veri alınırken hata oluştu:", event.target.error);
+                };
+            } else {
+                alert("Geçersiz rezervasyon ID.");
+            }
+        }
+    </script>
+</body>
+</html>

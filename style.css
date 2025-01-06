@@ -1,117 +1,290 @@
-/* Genel Sayfa Stili */
+/* Genel Stiller */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb;
+  color: #333;
+}
+
+/* Navigation */
+nav ul.menu {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(135deg, #007bff, #00c6ff);
+  padding: 15px;
+  margin: 0;
+  border-bottom: 2px solid #0056b3;
+}
+
+nav ul.menu li {
+  margin: 0 12px;
+}
+
+nav ul.menu li a {
+  color: #fff;
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+nav ul.menu li a:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Araç Listesi */
+main {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Araç Ekleme Formu */
+form {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+form label {
+  font-weight: bold;
+  color: #444;
+}
+
+form input,
+form select {
+  padding: 12px;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  width: 100%;
+  background-color: #f4f4f4;
+  transition: border 0.3s, background-color 0.3s;
+}
+
+form input:focus,
+form select:focus {
+  border: 2px solid #007bff;
+  background-color: #e6f1ff;
+}
+
+form button {
+  background-color: #007bff;
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  grid-column: span 2;
+}
+
+form button:hover {
+  background-color: #0056b3;
+}
+
+form button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+#successMessage,
+#errorMessage {
+  text-align: center;
+  font-size: 1.1rem;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+#successMessage {
+  color: green;
+}
+
+#errorMessage {
+  color: red;
+}
+
+/* Araç Kutucuğu Stili */
+#carList {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.car-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.car-item:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.car-info {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.car-info h3 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #007bff;
+}
+
+.car-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.car-details p {
+  flex: 1 1 50%;
+  font-size: 1rem;
+  margin: 8px 0;
+  color: #555;
+}
+
+.car-details p strong {
+  font-weight: bold;
+  color: #333;
+}
+
+.car-image {
+  flex-shrink: 0;
+}
+
+.car-image img {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+  #carDetail {
+    padding: 15px;
   }
-  
-  /* Menü için stil */
-  .menu {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    background: linear-gradient(45deg, #0078d4, #00c6ff);
-    padding: 12px 0;
-    border-radius: 50px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .menu li a {
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    padding: 10px 20px;
-    border-radius: 30px;
-    transition: all 0.3s ease;
-  }
-  
-  .menu li a:hover {
-    color: #0078d4;
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: scale(1.1);
-  }
-  
-  /* Header Stil */
-  header {
-    text-align: center;
-    margin-top: 40px;
-  }
-  
-  header h1 {
-    color: #333;
-    font-size: 28px;
-    margin-bottom: 20px;
-  }
-  
-  /* Ana içerik stili */
-  main {
-    display: flex;
+
+  .car-item {
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
+    padding: 15px;
   }
-  
-  /* Form Alanları */
-  form {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  .car-info {
+    padding-left: 0;
   }
-  
-  form label {
+
+  .car-images {
     display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-  }
-  
-  form input, form select {
-    width: 100%;
-    padding: 12px;
     margin-bottom: 15px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 16px;
   }
-  
-  form input:focus, form select:focus {
-    border-color: #0078d4;
-    outline: none;
+
+  .car-details {
+    grid-template-columns: 1fr; /* Mobilde tüm detayları tek sütun halinde göstermek */
   }
-  
-  /* Buton Stili */
-  button {
-    background-color: #0078d4;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 16px;
-    width: 100%;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #005bb5;
-  }
-  
-  /* Başarı Mesajı */
-  #successMessage {
-    display: none;
-    color: green;
-    margin-top: 20px;
-    font-weight: bold;
-    font-size: 16px;
-  }
-  
+}
+
+/* Araç Detayları Başlık */
+main h2 {
+  font-size: 2.4rem;
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Araç Detayları Kutusu */
+#carDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.car-images img {
+  width: 100%;
+  max-width: 280px;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.car-images {
+  animation: slide 10s infinite linear;
+}
+
+/* Modern Animation */
+@keyframes slide {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+ /* Durum Daire Simgesi için CSS */
+ .status-indicator {
+  display: inline-block;
+  width: 20px;  /* Dairenin genişliği */
+  height: 20px; /* Dairenin yüksekliği */
+  border-radius: 50%;
+  color: white;
+  text-align: center;
+  line-height: 20px; /* Yatayda ortalama */
+  vertical-align: middle; /* Dikeyde hizalama */
+}
+
+/* Rezervasyon durumu simgesi - yeşil (onaylı) */
+.status-indicator.reserved {
+  background-color: green; /* Yeşil daire */
+  animation: blink 1s infinite; /* Yanıp sönme efekti */
+}
+
+/* Rezervasyon durumu simgesi - kırmızı (onaysız) */
+.status-indicator.not-reserved {
+  background-color: red; /* Kırmızı daire */
+  animation: blink 1s infinite; /* Yanıp sönme efekti */
+}
+
+/* Yanıp Sönme Efekti */
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}

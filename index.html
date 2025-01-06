@@ -1,36 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Araçlar Listesi</title>
+    <!-- FontAwesome Kütüphanesini Dahil Etme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
-        <h1>Rent A Car - Araçlar Listesi</h1>
-    </header>
     <nav>
         <ul class="menu">
             <li><a href="index.html">Ana Sayfa</a></li>
-            <li><a href="list-cars.html">Araçlar Listesi</a></li>
-            <li><a href="update-car.html">Envanter Güncelle</a></li>
-            <li><a href="filter-cars.html">Envanter Filtreleme</a></li>
+            <li><a href="add-car.html">Envantere Araç Ekle</a></li>
+            <li><a href="update-car.html">Envanteri Güncelle</a></li>
+            <li><a href="filter-cars.html">Envanteri Filtrele</a></li>
         </ul>
     </nav>
+
     <main>
-        <h2>Mevcut Araçlar</h2>
+        <h2>Araçlar Listesi</h2>
         <div id="carList"></div>
     </main>
+
     <script>
         const carList = document.getElementById('carList');
         let db;
 
         // IndexedDB'yi başlatma
-        const request = indexedDB.open("CarInventoryDB", 1);
+        const request = indexedDB.open("CarInventoryDB", 9);
 
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            console.log("Veritabanı güncelleniyor...");
+
+            // "cars" objectStore'ını oluşturuyoruz, eğer mevcut değilse
+            if (!db.objectStoreNames.contains("cars")) {
+                const carsStore = db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
+                carsStore.createIndex("model", "model", { unique: false });
+                carsStore.createIndex("fuel", "fuel", { unique: false });
+            }
+        };
         request.onsuccess = (event) => {
             db = event.target.result;
             console.log("IndexedDB bağlantısı başarıyla sağlandı.");
@@ -54,14 +67,62 @@
                     cars.result.forEach(car => {
                         const carItem = document.createElement('div');
                         carItem.classList.add('car-item');
-                        carItem.innerHTML = `
-                            <h3>${car.model} (${car.year})</h3>
-                            <img src="${car.image}" alt="${car.model}" style="width: 200px; height: 200px; object-fit: cover;">
-                            <p>Km: ${car.km}</p>
-                            <p>Renk: ${car.color}</p>
-                            <p>Yakıt: ${car.fuel}</p>
-                            <p>Şanzıman: ${car.transmission}</p>
-                        `;
+                        carItem.setAttribute('data-car-id', car.id); // Benzersiz ID ekleyelim
+
+                        // Fotoğraf kontrolü
+                        const carImage = Array.isArray(car.images) && car.images.length > 0 ? car.images[0] : 'default-image.jpg'; // Varsayılan resim
+
+                        const carImageDiv = document.createElement('div');
+                        carImageDiv.classList.add('car-image');
+                        const img = document.createElement('img');
+                        img.src = carImage;
+                        img.alt = `${car.model}`;
+                        carImageDiv.appendChild(img);
+
+                        const carInfoDiv = document.createElement('div');
+                        carInfoDiv.classList.add('car-info');
+
+                        const carTitle = document.createElement('h3');
+                        carTitle.textContent = `${car.model} (${car.year})`;
+                        carInfoDiv.appendChild(carTitle);
+
+                        const carDetails = [
+                            { label: 'Kilometre', value: car.km },
+                            { label: 'Renk', value: car.color },
+                            { label: 'Plaka', value: car.plate },
+                            { label: 'Yakıt Türü', value: car.fuel },
+                            { label: 'Şanzıman', value: car.transmission },
+                            { label: 'Kasa Tipi', value: car.vehicleType },
+                            { label: 'Çekiş', value: car.category }
+                        ];
+
+                        carDetails.forEach(detail => {
+                            const p = document.createElement('p');
+                            p.innerHTML = `<strong>${detail.label}:</strong> ${detail.value}`;
+                            carInfoDiv.appendChild(p);
+                        });
+
+                        // Durum Bilgisi ve Daire Simgesi
+                        const statusDiv = document.createElement('p');
+                        statusDiv.innerHTML = `<strong>Durum Bilgisi:</strong> `;
+                        const statusIndicator = document.createElement('span');
+                        statusIndicator.classList.add('status-indicator');
+                        if (!car.status) {
+                            statusIndicator.classList.add('reserved'); // Yeşil daire
+                        } else {
+                            statusIndicator.classList.add('not-reserved'); // Kırmızı daire
+                        }
+                        statusDiv.appendChild(statusIndicator);
+                        carInfoDiv.appendChild(statusDiv);
+
+
+                        // Araç bilgisi tıklandığında detay sayfasına yönlendirme
+                        carItem.addEventListener('click', () => {
+                            window.location.href = `car-details.html?id=${car.id}`; // Araç ID'si ile yönlendirme
+                        });
+
+                        carItem.appendChild(carImageDiv);
+                        carItem.appendChild(carInfoDiv);
                         carList.appendChild(carItem);
                     });
                 }
@@ -71,6 +132,45 @@
                 console.error("Araçlar alınırken bir hata oluştu:", event.target.error);
             };
         }
+
+        // Rezervasyon durumunu güncelleyen fonksiyon
+        function updateReservationStatus(carId, newStatus) {
+            const transaction = db.transaction(["cars"], "readwrite");
+            const store = transaction.objectStore("cars");
+            const carRequest = store.get(carId);
+
+            carRequest.onsuccess = () => {
+                const car = carRequest.result;
+                if (!car) {
+                    console.error("Araç bulunamadı.");
+                    return;
+                }
+
+                car.status = newStatus; // Rezervasyon durumunu güncelle
+                store.put(car); // Güncellenmiş veriyi kaydet
+                console.log("Araç durumu güncellendi:", car);
+
+                // Durumu güncellemek için sadece ilgili öğeyi güncelle
+                const carItem = document.querySelector(`[data-car-id='${car.id}']`); // Bu aracı seçiyoruz
+                const statusIndicator = carItem.querySelector('.status-indicator');
+
+                // Durumun rengini güncelle
+                if (newStatus) {
+                    statusIndicator.classList.remove('reserved');
+                    statusIndicator.classList.add('not-reserved');
+                    statusIndicator.textContent = "Rezervasyon Yapılmamış"; // Durum metnini güncelle
+                } else {
+                    statusIndicator.classList.remove('not-reserved');
+                    statusIndicator.classList.add('reserved');
+                    statusIndicator.textContent = "Rezervasyon Yapılmış"; // Durum metnini güncelle
+                }
+            };
+
+            carRequest.onerror = (event) => {
+                console.error("Araç bilgisi alınırken bir hata oluştu:", event.target.error);
+            };
+        }
+
     </script>
 </body>
 

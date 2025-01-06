@@ -1,26 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Envanter Güncelle</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envanter Güncelle</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <header>
-    <h1>Rent A Car - Envanter Güncelle</h1>
-  </header>
-  <nav>
-    <ul class="menu">
-      <li><a href="index.html">Ana Sayfa</a></li>
-      <li><a href="add-car.html">Envanter Ekle</a></li>
-      <li><a href="list-cars.html">Araçlar Listesi</a></li>
-      <li><a href="filter-cars.html">Envanter Filtreleme</a></li>
-    </ul>
-  </nav>
-  <main>
-    <h2>Envanteri Güncelle</h2>
-    <p>Güncellenecek araçları seçmek için filtreleme yapın.</p>
-  </main>
+    <nav>
+        <ul class="menu">
+            <li><a href="index.html">Ana Sayfa</a></li>
+            <li><a href="add-car.html">Envantere Araç Ekle</a></li>
+            <li><a href="update-car.html">Envanteri Güncelle</a></li>
+            <li><a href="filter-cars.html">Envanteri Filtrele</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h2>Envanteri Güncelle</h2>
+
+        <!-- Plaka Girişi Alanı -->
+        <div id="plate-form">
+            <input type="text" id="plate" placeholder="Araç Plakasını Girin" />
+            <button onclick="findCarByPlate()">Araç Bul</button>
+        </div>
+
+        <div id="carDetails">
+            <!-- Araç bilgileri burada gösterilecek -->
+        </div>
+
+    </main>
+
+    <script>
+        let db;
+
+        // IndexedDB'yi başlatma
+        const request = indexedDB.open("CarInventoryDB", 9);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            console.log("Veritabanı güncelleniyor...");
+
+            if (!db.objectStoreNames.contains("cars")) {
+                const carsStore = db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
+                carsStore.createIndex("plate", "plate", { unique: true }); // Plaka üzerinde bir index oluşturduk
+            }
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("IndexedDB bağlantısı başarıyla sağlandı.");
+        };
+
+        request.onerror = (event) => {
+            console.error("IndexedDB başlatılırken bir hata oluştu:", event.target.error);
+        };
+
+        // Plaka ile aracı bulma ve bilgileri gösterme
+        function findCarByPlate() {
+            const plate = document.getElementById('plate').value.trim();
+
+            if (!plate) {
+                alert("Lütfen geçerli bir plaka girin.");
+                return;
+            }
+
+            const transaction = db.transaction(["cars"], "readonly");
+            const store = transaction.objectStore("cars");
+            const plateIndex = store.index("plate");
+            const plateRequest = plateIndex.get(plate); // Plakaya göre arama yapıyoruz
+
+            plateRequest.onsuccess = () => {
+                const car = plateRequest.result;
+                if (car) {
+                    showCarDetails(car); // Eğer araç bulunduysa bilgileri göster
+                } else {
+                    document.getElementById('carDetails').innerHTML = "<p>Bu plakaya ait araç bulunamadı.</p>";
+                }
+            };
+
+            plateRequest.onerror = (event) => {
+                console.error("Araç bilgisi alınırken bir hata oluştu:", event.target.error);
+            };
+        }
+
+        // Araç bilgilerini ekrana yazdırma ve düzenleme alanları oluşturma
+        function showCarDetails(car) {
+            const carDetailsDiv = document.getElementById('carDetails');
+            carDetailsDiv.innerHTML = `
+                <h3>${car.model} (${car.year})</h3>
+                <form id="carForm">
+                    <label for="model">Model:</label>
+                    <input type="text" id="model" value="${car.model}" />
+
+                    <label for="year">Yıl:</label>
+                    <input type="number" id="year" value="${car.year}" />
+
+                    <label for="km">Kilometre:</label>
+                    <input type="number" id="km" value="${car.km}" />
+
+                    <label for="color">Renk:</label>
+                    <input type="text" id="color" value="${car.color}" />
+
+                    <label for="fuel">Yakıt Türü:</label>
+                    <input type="text" id="fuel" value="${car.fuel}" />
+
+                    <label for="transmission">Şanzıman:</label>
+                    <input type="text" id="transmission" value="${car.transmission}" />
+
+                    <label for="plate">Plaka:</label>
+                    <input type="text" id="plate" value="${car.plate}" disabled />
+
+                    <button type="button" onclick="updateCar(${car.id})">Güncelle</button>
+                </form>
+            `;
+        }
+
+        // Araç bilgilerini güncelleme
+        function updateCar(carId) {
+            const carForm = document.getElementById('carForm');
+
+            const updatedCar = {
+                id: carId,
+                model: document.getElementById('model').value,
+                year: document.getElementById('year').value,
+                km: document.getElementById('km').value,
+                color: document.getElementById('color').value,
+                fuel: document.getElementById('fuel').value,
+                transmission: document.getElementById('transmission').value,
+                plate: document.getElementById('plate').value,
+            };
+
+            const transaction = db.transaction(["cars"], "readwrite");
+            const store = transaction.objectStore("cars");
+            const carRequest = store.put(updatedCar);
+
+            carRequest.onsuccess = () => {
+                alert("Araç bilgileri başarıyla güncellendi.");
+                findCarByPlate(); // Güncellenen bilgileri tekrar yükleyelim
+            };
+
+            carRequest.onerror = (event) => {
+                console.error("Araç güncellenirken bir hata oluştu:", event.target.error);
+            };
+        }
+    </script>
 </body>
+
 </html>

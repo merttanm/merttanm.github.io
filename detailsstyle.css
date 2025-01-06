@@ -1,0 +1,342 @@
+/* Genel Stiller */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    line-height: 1.7;
+}
+
+/* Navigation */
+nav ul.menu {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(135deg, #0052cc, #1e3c72);
+    padding: 16px 0;
+    margin: 0;
+    border-bottom: 4px solid #004080;
+}
+
+nav ul.menu li {
+    margin: 0 24px;
+}
+
+nav ul.menu li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+nav ul.menu li a:hover {
+    background-color: #004080;
+    transform: translateY(-3px);
+}
+
+/* Envanter Güncelleme Başlık */
+main h2 {
+    font-size: 2.4rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+/* Araç Detayları Kutusu */
+#carDetail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #0052cc;
+}
+
+/* Araç Görselleri */
+.car-images {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.image-container {
+    display: flex;
+    overflow: hidden;
+    width: 90%;
+    justify-content: center;
+}
+
+.car-image {
+    width: 100%;
+    max-width: 550px;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 12px;
+    opacity: 0;
+    display: none;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.car-image.active {
+    opacity: 1;
+    display: block;
+}
+
+/* Sağ ve Sol oklar */
+.nav-button {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    padding: 16px;
+    cursor: pointer;
+    font-size: 26px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+.prev {
+    left: 25px;
+}
+
+.next {
+    right: 25px;
+}
+
+/* Araç Bilgileri */
+.car-info h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #004080;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+}
+
+.car-info p {
+    font-size: 1.2rem;
+    margin: 12px 0;
+}
+
+.car-info p strong {
+    color: #0052cc;
+    font-weight: 600;
+}
+
+/* Detay Bilgileri */
+.car-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.car-details p {
+    font-size: 1.2rem;
+}
+
+.car-details p strong {
+    color: #0052cc;
+}
+
+.car-details .detail-item {
+    background-color: #f0f4f8;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.car-details .detail-item:hover {
+    background-color: #e0e4ed;
+    transform: translateY(-3px);
+}
+
+/* Araç Listesi */
+#carList {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.car-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.car-item:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: translateY(-8px);
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    #carDetail {
+        padding: 20px;
+    }
+
+    .car-details {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Rezervasyon Bölümü */
+#carReservation {
+    padding: 50px;
+    margin: 30px auto;
+    background-color: #f7f9fc;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    max-width: 650px;
+}
+
+#carReservation h2 {
+    text-align: center;
+    color: #004080;
+    font-size: 2.2rem;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* Rezervasyon Durumu */
+.car-status {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.car-status p {
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.car-status .status {
+    font-weight: bold;
+    color: green; /* Rezervasyon yapılmamış */
+}
+.status.booked {
+    color: red;
+}
+
+.car-status .status.booked {
+    color: red; /* Rezervasyon yapılmış */
+}
+
+/* Rezervasyon Formu */
+#reservationForm {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.form-group input {
+    padding: 14px;
+    font-size: 1.1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: #0052cc;
+    outline: none;
+    box-shadow: 0 0 6px rgba(56, 121, 251, 0.5);
+}
+
+.reserve-button {
+    background-color: #0052cc;
+    color: white;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.reserve-button:hover {
+    background-color: #003366;
+    transform: translateY(-3px);
+}
+
+.reserve-button:active {
+    transform: translateY(0);
+}
+/* Form Stilleri */
+#plate-form {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+#plate-form input {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border: 2px solid #3879fb;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+#plate-form input:focus {
+    border-color: #0056b3;
+    outline: none;
+}
+
+#plate-form button {
+    padding: 12px 20px;
+    background-color: #3879fb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#plate-form button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
