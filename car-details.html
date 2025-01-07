@@ -65,7 +65,7 @@
         let db;
 
         // Initialize IndexedDB
-        const request = indexedDB.open("CarInventoryDB", 9);  // Veritabanı sürümünü 8 olarak ayarlayın
+        const request = indexedDB.open("CarInventoryDB", 3);  
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;

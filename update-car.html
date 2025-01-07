@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Envanter Güncelle</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="updatestyle.css">
 </head>
 
 <body>
@@ -37,15 +37,24 @@
         let db;
 
         // IndexedDB'yi başlatma
-        const request = indexedDB.open("CarInventoryDB", 9);
+        const request = indexedDB.open("CarInventoryDB", 4);
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
-            console.log("Veritabanı güncelleniyor...");
 
+            // Eğer "cars" object store'u yoksa, oluşturun
             if (!db.objectStoreNames.contains("cars")) {
                 const carsStore = db.createObjectStore("cars", { keyPath: "id", autoIncrement: true });
-                carsStore.createIndex("plate", "plate", { unique: true }); // Plaka üzerinde bir index oluşturduk
+                carsStore.createIndex("plate", "plate", { unique: true }); // Plaka için indeks
+                carsStore.createIndex("model", "model", { unique: false }); // Model için indeks
+                carsStore.createIndex("fuel", "fuel", { unique: false });  // Yakıt türü için indeks
+            } else {
+                const carsStore = event.target.transaction.objectStore("cars");
+
+                // Eğer "plate" indeksi yoksa ekleyin
+                if (!carsStore.indexNames.contains("plate")) {
+                    carsStore.createIndex("plate", "plate", { unique: true });
+                }
             }
         };
 
@@ -60,7 +69,7 @@
 
         // Plaka ile aracı bulma ve bilgileri gösterme
         function findCarByPlate() {
-            const plate = document.getElementById('plate').value.trim();
+            const plate = document.getElementById('plate').value.trim().toLowerCase(); // Kullanıcının girdiği plakayı küçük harfe çeviriyoruz
 
             if (!plate) {
                 alert("Lütfen geçerli bir plaka girin.");
@@ -69,19 +78,29 @@
 
             const transaction = db.transaction(["cars"], "readonly");
             const store = transaction.objectStore("cars");
-            const plateIndex = store.index("plate");
-            const plateRequest = plateIndex.get(plate); // Plakaya göre arama yapıyoruz
+            const plateIndex = store.index("plate"); // Plaka indeksi kullanılıyor
 
-            plateRequest.onsuccess = () => {
-                const car = plateRequest.result;
-                if (car) {
-                    showCarDetails(car); // Eğer araç bulunduysa bilgileri göster
+            // Cursor ile arama yapıyoruz
+            const request = plateIndex.openCursor(); // Tüm öğeleri döndürüyoruz
+            let foundCar = null;
+
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.plate.toLowerCase() === plate) { // Eğer plaka eşleşiyorsa
+                        foundCar = cursor.value;
+                        showCarDetails(foundCar); // Bilgileri göster
+                        return; // Bulunduğunda döngüyü bitir
+                    }
+                    cursor.continue(); // Sonraki öğeye geç
                 } else {
-                    document.getElementById('carDetails').innerHTML = "<p>Bu plakaya ait araç bulunamadı.</p>";
+                    if (!foundCar) {
+                        document.getElementById('carDetails').innerHTML = "<p>Bu plakaya ait araç bulunamadı.</p>";
+                    }
                 }
             };
 
-            plateRequest.onerror = (event) => {
+            request.onerror = (event) => {
                 console.error("Araç bilgisi alınırken bir hata oluştu:", event.target.error);
             };
         }
@@ -89,6 +108,13 @@
         // Araç bilgilerini ekrana yazdırma ve düzenleme alanları oluşturma
         function showCarDetails(car) {
             const carDetailsDiv = document.getElementById('carDetails');
+
+            if (car && car.image) {
+                console.log(car.image);  // Resmin Base64 verisini kontrol et
+            } else {
+                console.log('Resim bulunamadı.');
+            }
+
             carDetailsDiv.innerHTML = `
                 <h3>${car.model} (${car.year})</h3>
                 <form id="carForm">
@@ -109,7 +135,7 @@
 
                     <label for="transmission">Şanzıman:</label>
                     <input type="text" id="transmission" value="${car.transmission}" />
-
+                
                     <label for="plate">Plaka:</label>
                     <input type="text" id="plate" value="${car.plate}" disabled />
 
@@ -130,16 +156,51 @@
                 color: document.getElementById('color').value,
                 fuel: document.getElementById('fuel').value,
                 transmission: document.getElementById('transmission').value,
-                plate: document.getElementById('plate').value,
+                plate: document.getElementById('plate').value.trim().toLowerCase(), // Plakayı küçük harfe çeviriyoruz
             };
 
+            const carImageInput = document.getElementById('carImage');
+            if (carImageInput && carImageInput.files[0]) {
+                const carImage = carImageInput.files[0];
+                getBase64Image(carImage).then(base64Image => {
+                    updatedCar.image = base64Image;
+                    saveCarToDatabase(updatedCar);
+                });
+            } else {
+                saveCarToDatabase(updatedCar);
+            }
+        }
+        function getBase64Image(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve(reader.result); // Fotoğrafı base64 formatında döndürüyoruz
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file); // Fotoğrafı okuyoruz
+            });
+        }
+
+        const transaction = db.transaction(["cars"], "readwrite");
+        const store = transaction.objectStore("cars");
+        const carRequest = store.put(updatedCar);
+
+        carRequest.onsuccess = () => {
+            alert("Araç bilgileri başarıyla güncellendi.");
+            findCarByPlate(); // Güncellenen bilgileri tekrar yükleyelim
+        };
+
+        carRequest.onerror = (event) => {
+            console.error("Araç güncellenirken bir hata oluştu:", event.target.error);
+        };
+        function saveCarToDatabase(updatedCar) {
             const transaction = db.transaction(["cars"], "readwrite");
             const store = transaction.objectStore("cars");
             const carRequest = store.put(updatedCar);
 
             carRequest.onsuccess = () => {
                 alert("Araç bilgileri başarıyla güncellendi.");
-                findCarByPlate(); // Güncellenen bilgileri tekrar yükleyelim
+                findCarByPlate();
             };
 
             carRequest.onerror = (event) => {

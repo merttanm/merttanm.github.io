@@ -4,7 +4,7 @@ const errorMessage = document.getElementById('errorMessage');
 let db;
 
 // IndexedDB'yi başlatma
-const request = indexedDB.open("CarInventoryDB", 9);
+const request = indexedDB.open("CarInventoryDB", 1);
 
 request.onupgradeneeded = (event) => {
     db = event.target.result;
@@ -96,8 +96,9 @@ addCarForm.addEventListener('submit', function (event) {
 
             // TXT dosyasını oluştur ve indir
             const carContent = JSON.stringify(newCar, null, 2);
+            
             createAndDownloadTxtFile(`${newCar.plate || 'arac'}.txt`, carContent);
-
+            console.log("newCar.plate:", newCar.plate);
             // Fotoğrafları base64 formatında indir
             newCar.images.forEach((base64Image, index) => {
                 const imageFileName = `${newCar.plate || 'arac'}_photo${index + 1}.jpg`;

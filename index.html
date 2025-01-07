@@ -31,7 +31,7 @@
         let db;
 
         // IndexedDB'yi başlatma
-        const request = indexedDB.open("CarInventoryDB", 9);
+        const request = indexedDB.open("CarInventoryDB", 3);
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
@@ -71,7 +71,7 @@
 
                         // Fotoğraf kontrolü
                         const carImage = Array.isArray(car.images) && car.images.length > 0 ? car.images[0] : 'default-image.jpg'; // Varsayılan resim
-
+                        console.log('Car Image Path:', carImage);
                         const carImageDiv = document.createElement('div');
                         carImageDiv.classList.add('car-image');
                         const img = document.createElement('img');

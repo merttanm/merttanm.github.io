@@ -1,0 +1,185 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fb;
+    color: #2d3436;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* Navigation */
+nav ul.menu {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(135deg, #4e73df, #2c3e50);
+    padding: 16px 0;
+    margin: 0;
+    border-bottom: 3px solid #34495e;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+nav ul.menu li {
+    margin: 0 25px;
+}
+
+nav ul.menu li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+nav ul.menu li a:hover {
+    background-color: #2c3e50;
+    transform: translateY(-4px);
+}
+
+/* Title Styles */
+main h2 {
+    font-size: 2.8rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 0 15px;
+}
+
+/* Form Styles */
+#plate-form {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+#plate-form input {
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    border: 2px solid #4e73df;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+    width: 300px;
+    max-width: 100%;
+}
+
+#plate-form input:focus {
+    border-color: #2c3e50;
+    outline: none;
+}
+
+#plate-form button {
+    padding: 14px 30px;
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+#plate-form button:hover {
+    background-color: #2c3e50;
+    transform: translateY(-2px);
+}
+
+/* Car Details */
+#carDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding: 35px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #4e73df;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+#carDetails h3 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#carDetails label {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #2d3436;
+}
+
+#carDetails input {
+    padding: 14px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    width: 100%;
+    transition: border-color 0.3s ease;
+}
+
+#carDetails input:focus {
+    border-color: #4e73df;
+    outline: none;
+}
+
+#carDetails button {
+    padding: 14px 30px;
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+#carDetails button:hover {
+    background-color: #2c3e50;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #carDetails {
+        padding: 20px;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    #carDetails h3 {
+        font-size: 1.8rem;
+    }
+
+    #plate-form {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #plate-form input,
+    #plate-form button {
+        width: 100%;
+    }
+}
