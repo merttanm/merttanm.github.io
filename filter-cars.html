@@ -42,7 +42,7 @@
     let db;
 
     // IndexedDB'yi başlatma
-    const request = indexedDB.open("CarInventoryDB", 4);
+    const request = indexedDB.open("CarInventoryDB", 5);
 
     request.onsuccess = (event) => {
       db = event.target.result;

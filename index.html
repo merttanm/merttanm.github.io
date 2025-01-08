@@ -31,7 +31,7 @@
         let db;
 
         // IndexedDB'yi başlatma
-        const request = indexedDB.open("CarInventoryDB", 3);
+        const request = indexedDB.open("CarInventoryDB", 5);
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;

@@ -8,7 +8,7 @@ function openDatabase() {
     }
 
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("CarInventoryDB", 1);
+        const request = indexedDB.open("CarInventoryDB", 5);
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;

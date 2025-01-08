@@ -4,7 +4,7 @@ const errorMessage = document.getElementById('errorMessage');
 let db;
 
 // IndexedDB'yi başlatma
-const request = indexedDB.open("CarInventoryDB", 1);
+const request = indexedDB.open("CarInventoryDB", 5);
 
 request.onupgradeneeded = (event) => {
     db = event.target.result;
